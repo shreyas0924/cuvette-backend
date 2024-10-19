@@ -5,9 +5,8 @@ export interface Company {
   name: string;
   companyName: string;
   email: string;
-  password: string;
   phone: string;
-  employeeSize: number;
+  employeeSize: string;
   isEmailVerified: boolean;
   isPhoneVerified: boolean;
   verificationToken?: string | null;
