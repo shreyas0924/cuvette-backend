@@ -5,4 +5,4 @@ import { createJob } from "../controller/job.controller";
 
 export const router = express.Router();
 
-router.post("/", authenticate, validateRequest(createJobSchema), createJob);
+router.post("/create", authenticate, validateRequest(createJobSchema), createJob);
