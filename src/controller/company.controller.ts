@@ -5,6 +5,7 @@ import { Company } from "../types/company";
 import { generateToken, hashPassword, verifyPassword } from "../services/auth";
 import { sendVerificationEmail } from "../services/email";
 import crypto from "crypto";
+import { sendOTPVerification } from "../services/twilio";
 
 export const registerCompany = async (
   req: Request,
@@ -41,6 +42,8 @@ export const registerCompany = async (
 
     // Try to send verification email
     const emailSent = await sendVerificationEmail(email, verificationToken);
+    // const otp = "123456";
+    // const otpSent = await sendOTPVerification(phone, otp);
     if (!emailSent) {
       // Delete the company record if email sending fails
       await db.collection("companies").deleteOne({ _id: result.insertedId });
@@ -51,11 +54,21 @@ export const registerCompany = async (
       });
       return;
     }
+    // if (!otpSent) {
+    //   // Delete the company record if email sending fails
+    //   await db.collection("companies").deleteOne({ _id: result.insertedId });
+    //   res.status(500).json({
+    //     error: "Failed to send verification otp. Please try registering again.",
+    //   });
+    //   return;
+    // }
+    const token = generateToken(result.insertedId);
 
     res.status(201).json({
       message:
         "Registration successful. Please check your email to verify your account.",
       companyId: result.insertedId,
+      token, // Return JWT token
     });
   } catch (error) {
     console.error("Registration error:", error);
@@ -134,36 +147,36 @@ export const verifyPhone = async (
   }
 };
 
-export const loginCompany = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
-  try {
-    const { email, password } = req.body;
+// export const loginCompany = async (
+//   req: Request,
+//   res: Response
+// ): Promise<void> => {
+//   try {
+//     const { email, password } = req.body;
 
-    const db = getDb();
-    const company = await db.collection("companies").findOne({ email });
+//     const db = getDb();
+//     const company = await db.collection("companies").findOne({ email });
 
-    if (!company) {
-      res.status(404).json({ error: "Company not found" });
-      return;
-    }
+//     if (!company) {
+//       res.status(404).json({ error: "Company not found" });
+//       return;
+//     }
 
-    // Verify the password
-    const passwordValid = await verifyPassword(password, company.password);
+//     // Verify the password
+//     const passwordValid = await verifyPassword(password, company.password);
 
-    if (!passwordValid) {
-      res.status(401).json({ error: "Invalid credentials" });
-      return;
-    }
+//     if (!passwordValid) {
+//       res.status(401).json({ error: "Invalid credentials" });
+//       return;
+//     }
 
-    // Generate JWT for the company
-    const token = generateToken(company._id);
+//     // Generate JWT for the company
+//     const token = generateToken(company._id);
 
-    // Return token in response
-    res.status(200).json({ token });
-  } catch (error) {
-    console.error("Login error:", error);
-    res.status(500).json({ error: "Internal server error" });
-  }
-};
+//     // Return token in response
+//     res.status(200).json({ token });
+//   } catch (error) {
+//     console.error("Login error:", error);
+//     res.status(500).json({ error: "Internal server error" });
+//   }
+// };

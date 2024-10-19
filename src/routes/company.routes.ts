@@ -5,7 +5,6 @@ import {
   companyRegistrationSchema,
 } from "../schema/company.schema";
 import {
-  loginCompany,
   registerCompany,
   verifyEmail,
   verifyPhone,
@@ -18,7 +17,7 @@ router.post(
   validateRequest(companyRegistrationSchema),
   registerCompany
 );
-router.post("/login", validateRequest(companyLoginSchema), loginCompany);
+// router.post("/login", validateRequest(companyLoginSchema), loginCompany);
 
 router.get("/verifyEmail", verifyEmail);
 router.get("/verifyPhone", verifyPhone);
