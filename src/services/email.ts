@@ -25,12 +25,12 @@ export const sendVerificationEmail = async (
 
     // Send mail with defined transport object
     const info = await transporter.sendMail({
-      from: `"Job Board" <${config.email.user}>`,
+      from: `"Cuvette Job Board" <${config.email.user}>`,
       to: to,
-      subject: "Verify Your Email - Job Board",
+      subject: "Verify Your Email - Cuvette Job Board",
       html: `
         <div style="font-family: Arial, sans-serif; padding: 20px;">
-          <h2>Welcome to Job Board!</h2>
+          <h2>Welcome to Cuvette Job Board!</h2>
           <p>Thank you for registering. Please click the button below to verify your email address:</p>
           <a href="${verificationLink}" 
              style="background-color: #4CAF50; color: white; padding: 14px 20px; 

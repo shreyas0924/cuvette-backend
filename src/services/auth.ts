@@ -1,8 +1,6 @@
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import { config } from "../config/config";
-import { getDb } from "../config/db";
-import { Company } from "../types/company";
 import { ObjectId } from "mongodb";
 
 export const generateToken = (companyId: ObjectId): string => {

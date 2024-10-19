@@ -2,7 +2,9 @@ import { z } from "zod";
 
 export const companyRegistrationSchema = z.object({
   name: z.string().min(2),
+  companyName: z.string().min(2),
   email: z.string().email(),
+  employeeSize: z.number().int().positive(),
   password: z.string().min(6),
   phone: z.string().regex(/^\+?[\d\s-]{10,}$/),
 });

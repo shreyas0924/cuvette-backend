@@ -12,7 +12,8 @@ export const registerCompany = async (
 ): Promise<void> => {
   try {
     const db = getDb();
-    const { name, email, password, phone } = req.body;
+    const { name, email, password, phone, companyName, employeeSize } =
+      req.body;
 
     // Check if company already exists
     const existingCompany = await db.collection("companies").findOne({ email });
@@ -27,6 +28,8 @@ export const registerCompany = async (
     const company: Company = {
       name,
       email,
+      companyName,
+      employeeSize,
       password: hashedPassword,
       phone,
       isEmailVerified: false,
