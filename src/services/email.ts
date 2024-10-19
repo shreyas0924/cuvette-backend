@@ -21,7 +21,7 @@ export const sendVerificationEmail = async (
     // Verify transporter configuration
     await transporter.verify();
 
-    const verificationLink = `http://localhost:3000/api/companies/verify?token=${token}`;
+    const verificationLink = `http://localhost:3000/api/companies/verifyEmail?token=${token}`;
 
     // Send mail with defined transport object
     const info = await transporter.sendMail({

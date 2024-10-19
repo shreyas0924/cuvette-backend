@@ -8,6 +8,7 @@ import {
   loginCompany,
   registerCompany,
   verifyEmail,
+  verifyPhone,
 } from "../controller/company.controller";
 
 export const router = express.Router();
@@ -19,4 +20,5 @@ router.post(
 );
 router.post("/login", validateRequest(companyLoginSchema), loginCompany);
 
-router.get("/verify", verifyEmail);
+router.get("/verifyEmail", verifyEmail);
+router.get("/verifyPhone", verifyPhone);

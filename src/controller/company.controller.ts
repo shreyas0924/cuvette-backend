@@ -99,6 +99,41 @@ export const verifyEmail = async (
   }
 };
 
+export const verifyPhone = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const { otp } = req.query;
+
+    if (!otp || typeof otp !== "string") {
+      res.status(400).json({ error: "Invalid OTP" });
+      return;
+    }
+
+    const db = getDb();
+    const result = await db.collection("companies").updateOne(
+      {},
+      {
+        $set: {
+          isPhoneVerified: true,
+          phoneOTP: null,
+          updatedAt: new Date(),
+        },
+      }
+    );
+    if (result.matchedCount === 0) {
+      res.status(400).json({ error: "Invalid or expired OTP" });
+      return;
+    }
+
+    res.json({ message: "Phone verified successfully." });
+  } catch (error) {
+    console.error("Verification error:", error);
+    res.status(500).json({ error: "Error verifying phone" });
+  }
+};
+
 export const loginCompany = async (
   req: Request,
   res: Response
