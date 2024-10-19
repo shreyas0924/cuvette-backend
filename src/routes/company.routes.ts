@@ -19,5 +19,5 @@ router.post(
 );
 // router.post("/login", validateRequest(companyLoginSchema), loginCompany);
 
-router.get("/verifyEmail", verifyEmail);
+router.post("/verifyEmail", verifyEmail);
 router.get("/verifyPhone", verifyPhone);

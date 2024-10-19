@@ -1,12 +1,12 @@
-// src/controllers/company.controller.ts
 import { Request, Response } from "express";
 import { getDb } from "../config/db";
 import { Company } from "../types/company";
-import { generateToken, hashPassword, verifyPassword } from "../services/auth";
+import { generateToken } from "../services/auth";
 import { sendVerificationEmail } from "../services/email";
-import crypto from "crypto";
-import { sendOTPVerification } from "../services/twilio";
 
+function generateOTP(): string {
+  return Math.floor(100000 + Math.random() * 900000).toString();
+}
 export const registerCompany = async (
   req: Request,
   res: Response
@@ -22,7 +22,7 @@ export const registerCompany = async (
       return; // Stop execution after sending response
     }
 
-    const verificationToken = crypto.randomBytes(32).toString("hex");
+    const emailOTP = generateOTP();
 
     const company: Company = {
       name,
@@ -32,7 +32,7 @@ export const registerCompany = async (
       phone,
       isEmailVerified: false,
       isPhoneVerified: false,
-      verificationToken,
+      verificationToken: emailOTP, // Save the OTP in the record
       createdAt: new Date(),
       updatedAt: new Date(),
     };
@@ -41,9 +41,7 @@ export const registerCompany = async (
     const result = await db.collection("companies").insertOne(company);
 
     // Try to send verification email
-    const emailSent = await sendVerificationEmail(email, verificationToken);
-    // const otp = "123456";
-    // const otpSent = await sendOTPVerification(phone, otp);
+    const emailSent = await sendVerificationEmail(email, emailOTP);
     if (!emailSent) {
       // Delete the company record if email sending fails
       await db.collection("companies").deleteOne({ _id: result.insertedId });
@@ -54,14 +52,7 @@ export const registerCompany = async (
       });
       return;
     }
-    // if (!otpSent) {
-    //   // Delete the company record if email sending fails
-    //   await db.collection("companies").deleteOne({ _id: result.insertedId });
-    //   res.status(500).json({
-    //     error: "Failed to send verification otp. Please try registering again.",
-    //   });
-    //   return;
-    // }
+
     const token = generateToken(result.insertedId);
 
     res.status(201).json({
@@ -81,29 +72,41 @@ export const verifyEmail = async (
   res: Response
 ): Promise<void> => {
   try {
-    const { token } = req.query;
+    const { email, otp } = req.body;
 
-    if (!token || typeof token !== "string") {
-      res.status(400).json({ error: "Invalid verification token" });
+    if (!otp) {
+      res.status(400).json({ error: "Email and OTP are required" });
       return;
     }
 
     const db = getDb();
-    const result = await db.collection("companies").updateOne(
-      { verificationToken: token },
+    const company = await db.collection("companies").findOne({ email });
+
+    await db.collection("companies").updateOne(
+      {}, // Filter to update the correct company
       {
         $set: {
-          isEmailVerified: true,
-          verificationToken: null,
+          verificationToken: otp,
           updatedAt: new Date(),
         },
       }
     );
-
-    if (result.matchedCount === 0) {
-      res.status(400).json({ error: "Invalid or expired verification token" });
+    if (!company || company.verificationToken !== otp) {
+      res.status(400).json({ error: "Invalid or expired OTP" });
       return;
     }
+
+    // Update email verification status
+    await db.collection("companies").updateOne(
+      {}, // Filter to update the correct company
+      {
+        $set: {
+          isEmailVerified: true,
+          verificationToken: null, // Clear the OTP after verification
+          updatedAt: new Date(),
+        },
+      }
+    );
 
     res.json({ message: "Email verified successfully. You can now log in." });
   } catch (error) {

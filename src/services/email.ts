@@ -13,34 +13,23 @@ const createTransporter = () => {
 
 export const sendVerificationEmail = async (
   to: string,
-  token: string
+  otp: string
 ): Promise<boolean> => {
   try {
     const transporter = createTransporter();
 
-    // Verify transporter configuration
     await transporter.verify();
 
-    const verificationLink = `http://localhost:3000/api/companies/verifyEmail?token=${token}`;
-
-    // Send mail with defined transport object
     const info = await transporter.sendMail({
-      from: `"Cuvette Job Board" <${config.email.user}>`,
+      from: `"Job Board" <${config.email.user}>`,
       to: to,
-      subject: "Verify Your Email - Cuvette Job Board",
+      subject: "Verify Your Email - Job Board",
       html: `
         <div style="font-family: Arial, sans-serif; padding: 20px;">
-          <h2>Welcome to Cuvette Job Board!</h2>
-          <p>Thank you for registering. Please click the button below to verify your email address:</p>
-          <a href="${verificationLink}" 
-             style="background-color: #4CAF50; color: white; padding: 14px 20px; 
-                    text-align: center; text-decoration: none; display: inline-block; 
-                    border-radius: 4px; margin: 10px 0;">
-            Verify Email
-          </a>
-          <p>Or copy and paste this link in your browser:</p>
-          <p>${verificationLink}</p>
-          <p>This link will expire in 24 hours.</p>
+          <h2>Welcome to Job Board!</h2>
+          <p>Thank you for registering. Your OTP for verification is:</p>
+          <h1 style="font-size: 24px; color: #4CAF50;">${otp}</h1>
+          <p>This OTP will expire in 10 minutes.</p>
           <p>If you didn't create an account, you can safely ignore this email.</p>
         </div>
       `,
